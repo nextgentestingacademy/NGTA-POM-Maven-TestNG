@@ -1,27 +1,30 @@
 package base;
 
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 
+import utils.ConfigReader;
+import utils.DriverFactory;
+
 public class BaseTest {
-	public WebDriver driver;
+	public String browser;
+	public String url;
 	
 	@BeforeMethod(alwaysRun = true)
 	public void launchApp() {
 		System.out.println("Launching Application");
-		driver = new ChromeDriver();
-		driver.manage().window().maximize();
-		driver.get("https://www.makemytrip.com/");
+		ConfigReader.loadProperties();
+		browser = ConfigReader.get("browser");
+		DriverFactory.initDriver(browser);
+		DriverFactory.getDriver().manage().window().maximize();
+		
+		url = ConfigReader.get("appUrl");
+		DriverFactory.getDriver().get(url);
 	}
 	
 	@AfterMethod(alwaysRun = true)
 	public void tearDown() {
 		System.out.println("Closing Application");
-		if(driver!=null) {
-			driver.quit();
-		}
+		DriverFactory.quitDriver();
 	}
-	
 }

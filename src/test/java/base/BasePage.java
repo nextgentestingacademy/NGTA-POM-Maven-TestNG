@@ -13,16 +13,21 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-public class BasePage {
-	protected WebDriver driver;
-	Actions actions;
-	WebDriverWait wait;
+import utils.ConfigReader;
+import utils.DriverFactory;
 
+public class BasePage {
+	protected Actions actions;
+	protected WebDriverWait wait;
+	int time;
+	
 	// ========== Wait methods ==========
-	public BasePage(WebDriver driver) {
-		this.driver = driver;
-		this.actions = new Actions(driver);
-		this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+	public BasePage() {
+		WebDriver driver = DriverFactory.getDriver();
+		time = Integer.parseInt(ConfigReader.get("timeout"));
+		
+		actions = new Actions(driver);
+		wait = new WebDriverWait(driver, Duration.ofSeconds(time));
 	}
 
 	public WebElement waitForVisible(WebElement elm) {
@@ -98,11 +103,11 @@ public class BasePage {
 	// -------------------------
 
 	public void open(String url) {
-		driver.get(url);
+		DriverFactory.getDriver().get(url);
 	}
 
 	public String getPageTitle() {
-		return driver.getTitle();
+		return DriverFactory.getDriver().getTitle();
 	}
 
 	// -------------------------
@@ -146,7 +151,8 @@ public class BasePage {
 		wait.until(ExpectedConditions.visibilityOf(inputBox));
 		wait.until(ExpectedConditions.elementToBeClickable(inputBox));
 		jsClick(inputBox);
-		type(inputBox,textToType);
+		jsSetValue(inputBox,textToType);
+//		System.out.println(type(inputBox,textToType));
 
 		// Wait until suggestions are visible
 		wait.until(ExpectedConditions.visibilityOfAllElements(suggestions));
@@ -172,11 +178,11 @@ public class BasePage {
 	// -------------------------
 
 	public void scrollTo(WebElement elm) {
-		((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", elm);
+		((JavascriptExecutor) DriverFactory.getDriver()).executeScript("arguments[0].scrollIntoView(true);", elm);
 	}
 
 	public void scrollBy(int x, int y) {
-		((JavascriptExecutor) driver).executeScript("window.scrollBy(arguments[0], arguments[1]);", x, y);
+		((JavascriptExecutor) DriverFactory.getDriver()).executeScript("window.scrollBy(arguments[0], arguments[1]);", x, y);
 	}
 
 	// -------------------------
@@ -185,18 +191,18 @@ public class BasePage {
 
 	public void jsClick(WebElement elm) {
 		waitForVisible(elm);
-		((JavascriptExecutor) driver).executeScript("arguments[0].click();", elm);
+		((JavascriptExecutor) DriverFactory.getDriver()).executeScript("arguments[0].click();", elm);
 	}
 
 	public void jsSetValue(WebElement elm, String value) {
 		waitForVisible(elm);
-		((JavascriptExecutor) driver).executeScript("arguments[0].value='" + value + "'", elm);
+		((JavascriptExecutor) DriverFactory.getDriver()).executeScript("arguments[0].value='" + value + "'", elm);
 	}
 	
 	public void jsSetValueCharByChar(WebElement elm, String value) {
 	    waitForVisible(elm);
 
-	    JavascriptExecutor js = (JavascriptExecutor) driver;
+	    JavascriptExecutor js = (JavascriptExecutor) DriverFactory.getDriver();
 
 	    // Clear existing value
 	    js.executeScript("arguments[0].value='';", elm);
@@ -215,7 +221,7 @@ public class BasePage {
 
 	public String jsGetText(WebElement elm) {
 		waitForVisible(elm);
-		return (String) ((JavascriptExecutor) driver).executeScript("return arguments[0].textContent;", elm);
+		return (String) ((JavascriptExecutor) DriverFactory.getDriver()).executeScript("return arguments[0].textContent;", elm);
 	}
 
 	// -------------------------
@@ -244,6 +250,10 @@ public class BasePage {
 
 	public void typeUsingActions(WebElement elm, String text) {
 		actions.moveToElement(waitForVisible(elm)).click().sendKeys(text).perform();
+	}
+	
+	public void clickUsingOffset(int x,int y) {
+		actions.moveByOffset(x, y).click().perform();
 	}
 
 	// -------------------------
@@ -274,19 +284,19 @@ public class BasePage {
 
 	public void switchToFrame(WebElement frameElement) {
 		waitForVisible(frameElement);
-		driver.switchTo().frame(frameElement);
+		DriverFactory.getDriver().switchTo().frame(frameElement);
 	}
 
 	public void switchToFrameByIndex(int index) {
-		driver.switchTo().frame(index);
+		DriverFactory.getDriver().switchTo().frame(index);
 	}
 
 	public void switchToDefault() {
-		driver.switchTo().defaultContent();
+		DriverFactory.getDriver().switchTo().defaultContent();
 	}
 
 	public void switchToWindow(String handle) {
-		driver.switchTo().window(handle);
+		DriverFactory.getDriver().switchTo().window(handle);
 	}
 
 	// -------------------------
@@ -294,7 +304,7 @@ public class BasePage {
 	// -------------------------
 
 	public void waitForPageLoad() {
-		new WebDriverWait(driver, Duration.ofSeconds(15)).until(webDriver -> ((JavascriptExecutor) driver)
+		new WebDriverWait(DriverFactory.getDriver(), Duration.ofSeconds(15)).until(webDriver -> ((JavascriptExecutor) DriverFactory.getDriver())
 				.executeScript("return document.readyState").equals("complete"));
 	}
 

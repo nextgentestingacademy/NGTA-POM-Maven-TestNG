@@ -9,6 +9,7 @@ import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 
 import base.BasePage;
+import utils.DriverFactory;
 
 public class HomePage extends BasePage{
 	//Page Factory element
@@ -35,15 +36,20 @@ public class HomePage extends BasePage{
 
 	@FindBy(xpath="//div[@class='DayPicker-Caption']/div")
 	List<WebElement> calMonYear;
+
+	@FindBy(className=".specialFareContainer")
+	WebElement elmSpecialFare;
 	
 	//constructor
-	public HomePage(WebDriver driver) {
-		super(driver);
-		PageFactory.initElements(driver, this);
+	public HomePage() {
+		super();
+		PageFactory.initElements(DriverFactory.getDriver(), this);
 	}
 	
 	//page specific methods
 	public boolean enterFromCity(String fromLoc,String exactFromLoc) throws InterruptedException {
+		clickUsingOffset(10,10);
+
 		return selectFromAutoSuggest(edtFrom,autosuggLoc,fromLoc,exactFromLoc);
 	}
 	
@@ -60,7 +66,7 @@ public class HomePage extends BasePage{
 			}
 		}
 	
-		WebElement calMonth=driver.findElement(By.xpath("(//div[@class='DayPicker-Month'])[" + calendar + "]"));
+		WebElement calMonth=DriverFactory.getDriver().findElement(By.xpath("(//div[@class='DayPicker-Month'])[" + calendar + "]"));
 		List<WebElement> calDays  = calMonth.findElements(By.tagName("p"));
 		for(WebElement elm:calDays) {
 			if(elm.getText().equalsIgnoreCase(day)) {
